@@ -88,8 +88,34 @@ function draw() {
   translate(width, 0); // 將座標原點移至畫布最右側
   scale(-1, 1); // 水平翻轉座標軸
 
-  // 繪製影像，由於座標軸已翻轉，計算出的位置會自動對應到正確的視覺位置
-  image(capture, xPos, yPos, videoW, videoH);
+  // 產生馬賽克與黑白處理效果
+  if (capture.width > 0) {
+    capture.loadPixels();
+    let step = 20; // 定義馬賽克單位大小 (20x20)
+    noStroke();
+    
+    for (let y = 0; y < capture.height; y += step) {
+      for (let x = 0; x < capture.width; x += step) {
+        // 取得該單位起始像素的 RGB 值
+        let i = (y * capture.width + x) * 4;
+        let r = capture.pixels[i];
+        let g = capture.pixels[i + 1];
+        let b = capture.pixels[i + 2];
+        
+        // 計算黑白數值：(R+G+B)/3
+        let gray = (r + g + b) / 3;
+        
+        fill(gray);
+        // 將攝影機座標轉換為畫布上的顯示座標與寬高
+        let dx = map(x, 0, capture.width, xPos, xPos + videoW);
+        let dy = map(y, 0, capture.height, yPos, yPos + videoH);
+        let dw = map(step, 0, capture.width, 0, videoW);
+        let dh = map(step, 0, capture.height, 0, videoH);
+        
+        rect(dx, dy, dw, dh);
+      }
+    }
+  }
   
   // 將 pg 繪製在視訊畫面的上方
   image(pg, xPos, yPos, videoW, videoH);
