@@ -88,27 +88,28 @@ function draw() {
   translate(width, 0); // 將座標原點移至畫布最右側
   scale(-1, 1); // 水平翻轉座標軸
 
-  // 產生馬賽克與黑白處理效果
+  // --- 馬賽克黑白效果實作 ---
   if (capture.width > 0) {
     capture.loadPixels();
-    let step = 20; // 定義馬賽克單位大小 (20x20)
+    let step = 20; // 每 20 像素採樣一次，形成 20x20 的馬賽克方塊
     noStroke();
     
     for (let y = 0; y < capture.height; y += step) {
       for (let x = 0; x < capture.width; x += step) {
-        // 取得該單位起始像素的 RGB 值
+        // 取得攝影機像素陣列中的索引位置
         let i = (y * capture.width + x) * 4;
         let r = capture.pixels[i];
         let g = capture.pixels[i + 1];
         let b = capture.pixels[i + 2];
         
-        // 計算黑白數值：(R+G+B)/3
+        // 依照需求計算平均亮度，達成黑白效果
         let gray = (r + g + b) / 3;
         
         fill(gray);
-        // 將攝影機座標轉換為畫布上的顯示座標與寬高
+        // 將攝影機的原始座標映射 (mapping) 到畫布中央 60% 的區域
         let dx = map(x, 0, capture.width, xPos, xPos + videoW);
         let dy = map(y, 0, capture.height, yPos, yPos + videoH);
+        // 計算每個馬賽克方塊在畫布上的實際寬高
         let dw = map(step, 0, capture.width, 0, videoW);
         let dh = map(step, 0, capture.height, 0, videoH);
         
@@ -116,8 +117,9 @@ function draw() {
       }
     }
   }
+  // -------------------------
   
-  // 將 pg 繪製在視訊畫面的上方
+  // 將帶有泡泡效果的繪圖層疊加在視訊畫面之上
   image(pg, xPos, yPos, videoW, videoH);
 
   pop(); // 恢復繪圖狀態，避免影響到後續其他的繪圖指令
