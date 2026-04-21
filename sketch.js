@@ -1,6 +1,7 @@
 let capture;
 let pg; // 宣告繪圖緩衝區
 let bubbles = []; // 儲存泡泡資料的陣列
+let saveBtn; // 宣告按鈕變數
 
 function setup() {
   // 建立全螢幕畫布
@@ -13,6 +14,11 @@ function setup() {
   // 建立一個與視訊畫面（畫布 60%）一樣寬高的繪圖空間
   pg = createGraphics(windowWidth * 0.6, windowHeight * 0.6);
   initBubbles();
+
+  // 建立按鈕並設定位置與點擊事件
+  saveBtn = createButton('擷取視訊畫面');
+  saveBtn.position(width / 2 - 50, height - 60);
+  saveBtn.mousePressed(takeSnap);
 }
 
 class Bubble {
@@ -98,8 +104,24 @@ function initBubbles() {
   }
 }
 
+function takeSnap() {
+  // 計算與 draw 函式中相同的區域範圍
+  let videoW = width * 0.6;
+  let videoH = height * 0.6;
+  let xPos = (width - videoW) / 2;
+  let yPos = (height - videoH) / 2;
+
+  // 使用 get() 取得畫布指定區域的圖像
+  let img = get(xPos, yPos, videoW, videoH);
+  
+  // 儲存為 jpg 檔案
+  img.save('my_snapshot', 'jpg');
+}
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  // 重新調整按鈕位置
+  saveBtn.position(width / 2 - 50, height - 60);
   // 視窗縮放時同時調整 pg 的大小
   pg = createGraphics(windowWidth * 0.6, windowHeight * 0.6);
   initBubbles();
