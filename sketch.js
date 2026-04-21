@@ -1,5 +1,6 @@
 let capture;
 let pg; // 宣告繪圖緩衝區
+let bubbles = []; // 儲存泡泡資料的陣列
 
 function setup() {
   // 建立全螢幕畫布
@@ -11,6 +12,16 @@ function setup() {
 
   // 建立一個與視訊畫面（畫布 60%）一樣寬高的繪圖空間
   pg = createGraphics(windowWidth * 0.6, windowHeight * 0.6);
+
+  // 初始化一些泡泡
+  for (let i = 0; i < 30; i++) {
+    bubbles.push({
+      x: random(pg.width),
+      y: random(pg.height),
+      size: random(10, 40),
+      speed: random(1, 3)
+    });
+  }
 }
 
 function draw() {
@@ -24,12 +35,20 @@ function draw() {
 
   // 在 pg (繪圖緩衝區) 上繪製內容
   pg.clear(); // 保持背景透明
-  pg.fill(255, 255, 255, 150); // 半透明白色
   pg.noStroke();
-  pg.rect(20, 20, 150, 50, 10); // 在左上角畫一個小方塊
-  pg.fill(0);
-  pg.textAlign(CENTER, CENTER);
-  pg.text("Camera Overlay", 95, 45); // 在方塊內加入文字
+  pg.fill(255, 255, 255, 100); // 半透明白色泡泡
+
+  // 更新並繪製每一個泡泡
+  for (let b of bubbles) {
+    pg.ellipse(b.x, b.y, b.size);
+    b.y -= b.speed; // 讓泡泡向上移動
+
+    // 如果泡泡完全超出頂部，重新回到底部隨機位置
+    if (b.y < -b.size) {
+      b.y = pg.height + b.size;
+      b.x = random(pg.width);
+    }
+  }
   
   // 修正攝影機左右顛倒問題
   push(); // 保存當前的繪圖狀態
@@ -49,4 +68,15 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   // 視窗縮放時同時調整 pg 的大小
   pg = createGraphics(windowWidth * 0.6, windowHeight * 0.6);
+  
+  // 重新調整泡泡的初始位置，避免超出新畫布
+  bubbles = [];
+  for (let i = 0; i < 30; i++) {
+    bubbles.push({
+      x: random(pg.width),
+      y: random(pg.height),
+      size: random(10, 40),
+      speed: random(1, 3)
+    });
+  }
 }
